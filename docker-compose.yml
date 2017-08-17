@@ -53,7 +53,7 @@ services:
     environment:
       - PUID=${DOCKER_USER_ID}
       - PGID=${DOCKER_USER_GROUP_ID}
-      - TZ=${PLEX_TIMEZONE}
+      - TZ=${TIMEZONE}
       - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
       - VIRTUAL_HOST=${PLEX_HOSTNAME},${PLEX_VIRTUAL_HOST}
       - VIRTUAL_PORT=32400
@@ -124,8 +124,27 @@ services:
       - proxy-tier
     restart: always
 
+  home-assistant:
+    image: homeassistant/home-assistant
+    container_name: home-assistant
+    links:
+      - plex
+    ports:
+      - 8123:8123
+    volumes:
+      - /opt/appdata/home-assistant:/config
+    networks:
+      - proxy-tier
+    environment:
+      - TZ=${TIMEZONE}
+      - VIRTUAL_HOST=${HOME_ASSISTANT_VIRTUAL_HOST}
+      - VIRTUAL_PORT=8123
+      - LETSENCRYPT_HOST=${HOME_ASSISTANT_VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+    restart: unless-stopped
+
 networks:
   proxy-tier:
     external:
       name: nginx-proxy
-
+      
