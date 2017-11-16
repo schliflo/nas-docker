@@ -8,27 +8,27 @@ services:
     ports:
       - 80:80
       - 443:443
+    networks:
+      - proxy-tier
+    restart: unless-stopped
     volumes:
       - ./proxy/conf.d:/etc/nginx/conf.d
       - ./proxy/vhost.d:/etc/nginx/vhost.d
       - ./proxy/html:/usr/share/nginx/html
       - ./proxy/certs:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
-    networks:
-      - proxy-tier
-    restart: always
 
   letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
     container_name: letsencrypt
+    networks:
+      - proxy-tier
+    restart: unless-stopped
+    volumes_from:
+      - proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./proxy/certs:/etc/nginx/certs
-    volumes_from:
-      - proxy
-    networks:
-      - proxy-tier
-    restart: always
 
   plex:
     image: plexinc/pms-docker
@@ -43,12 +43,15 @@ services:
       - 32412:32412/udp
       - 32413:32413/udp
       - 32414:32414/udp
-    volumes:
-      - /opt/appdata/plex:/config
-      - /mnt/storage/shares:/data
     networks:
       - proxy-tier
-    restart: always
+    restart: unless-stopped
+    volumes:
+      - ./appdata/plex:/config
+      - ${STORAGE_PATH}/shares:/data
+    tmpfs:
+      - /tmp
+      - /transcode
     hostname: ${PLEX_HOSTNAME}
     environment:
       - PUID=${DOCKER_USER_ID}
@@ -63,88 +66,103 @@ services:
   nextcloud-web:
     image: nginx
     container_name: nextcloud_webserver
-    volumes:
-      - /opt/appdata/nextcloud/nginx.conf:/etc/nginx/nginx.conf:ro
     links:
       - nextcloud-app
       - collabora
+    networks:
+      - proxy-tier
+    restart: unless-stopped
     volumes_from:
       - nextcloud-app
+    volumes:
+      - ./appdata/nextcloud/nginx.conf:/etc/nginx/nginx.conf:ro
     environment:
       - VIRTUAL_HOST=${NEXTCLOUD_VIRTUAL_HOST}
       - VIRTUAL_PORT=80
       - LETSENCRYPT_HOST=${NEXTCLOUD_VIRTUAL_HOST}
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
-    networks:
-      - proxy-tier
-    restart: always
 
   nextcloud-app:
     image: nextcloud:fpm
     container_name: nextcloud_fpm
     links:
       - nextcloud-db
-    volumes:
-      - /opt/appdata/nextcloud/apps:/var/www/html/apps
-      - /opt/appdata/nextcloud/config:/var/www/html/config
-      - /mnt/storage/cloud:/var/www/html/data
     networks:
       - proxy-tier
-    restart: always
+    restart: unless-stopped
+    volumes:
+      - ./appdata/nextcloud/apps:/var/www/html/apps
+      - ./appdata/nextcloud/config:/var/www/html/config
+      - ${STORAGE_PATH}/cloud:/var/www/html/data
 
   nextcloud-db:
     image: mariadb
     container_name: nextcloud_db
+    networks:
+      - proxy-tier
+    restart: unless-stopped
     volumes:
-      - /opt/appdata/nextcloud/db:/var/lib/mysql
+      - ./appdata/nextcloud/db:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
       - MYSQL_PASSWORD=${NEXTCLOUD_MYSQL_PASSWORD}
-    networks:
-      - proxy-tier
-    restart: always
 
   redis:
     image: redis
     container_name: redis
     networks:
       - proxy-tier
-    restart: always
+    restart: unless-stopped
 
   collabora:
     image: collabora/code
     container_name: collabora
     cap_add:
       - MKNOD
-    environment:
-      - domain=${NEXTCLOUD_VIRTUAL_HOST}
     networks:
       - proxy-tier
-    restart: always
+    restart: unless-stopped
+    environment:
+      - domain=${NEXTCLOUD_VIRTUAL_HOST}
 
   home-assistant:
-    image: homeassistant/home-assistant
+# We build the image ourself and install dependencies necessary for tradfri until these issues are resolved:
+# - https://github.com/home-assistant/home-assistant/issues/10376
+# - https://github.com/home-assistant/home-assistant/issues/10048
+#    image: homeassistant/home-assistant
+    build:
+      context: .
+      dockerfile: Dockerfile.home-assistant
     container_name: home-assistant
     links:
       - plex
     ports:
       - 8123:8123
-    volumes:
-      - /opt/appdata/home-assistant:/config
     networks:
       - proxy-tier
+    restart: unless-stopped
+    volumes:
+      - ./appdata/home-assistant:/config
     environment:
       - TZ=${TIMEZONE}
       - VIRTUAL_HOST=${HOME_ASSISTANT_VIRTUAL_HOST}
       - VIRTUAL_PORT=8123
       - LETSENCRYPT_HOST=${HOME_ASSISTANT_VIRTUAL_HOST}
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+
+  duplicati:
+    image: linuxserver/duplicati
+    container_name: duplicati
+    ports:
+      - 8200:8200
     restart: unless-stopped
+    volumes:
+      - ./:/source/opt
+      - ${STORAGE_PATH}:/source/storage
 
 networks:
   proxy-tier:
     external:
       name: nginx-proxy
-      
