@@ -1,9 +1,11 @@
-# /opt/docker-compose.yml
----
-version: '2'
+version: '3'
+
 services:
+#-----------------------------------#
+# PROXY                             #
+#-----------------------------------#
   proxy:
-    image: jwilder/nginx-proxy
+    build: ./apps/proxy
     container_name: proxy
     ports:
       - 80:80
@@ -12,24 +14,33 @@ services:
       - proxy-tier
     restart: unless-stopped
     volumes:
-      - ./proxy/conf.d:/etc/nginx/conf.d
-      - ./proxy/vhost.d:/etc/nginx/vhost.d
-      - ./proxy/html:/usr/share/nginx/html
-      - ./proxy/certs:/etc/nginx/certs:ro
+      - proxy-certs:/etc/nginx/certs:ro
+      - proxy-conf:/etc/nginx/conf.d
+      - proxy-vhost:/etc/nginx/vhost.d
+      - proxy-html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
+
+#-----------------------------------#
+# LETSENCRYPT                       #
+#-----------------------------------#
   letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
     container_name: letsencrypt
     networks:
       - proxy-tier
     restart: unless-stopped
-    volumes_from:
-      - proxy
     volumes:
+      - proxy-certs:/etc/nginx/certs
+      - proxy-conf:/etc/nginx/conf.d
+      - proxy-vhost:/etc/nginx/vhost.d
+      - proxy-html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./proxy/certs:/etc/nginx/certs
 
+
+#-----------------------------------#
+# PLEX                              #
+#-----------------------------------#
   plex:
     image: plexinc/pms-docker
     container_name: plex
@@ -45,9 +56,10 @@ services:
       - 32414:32414/udp
     networks:
       - proxy-tier
+      - default
     restart: unless-stopped
     volumes:
-      - ./appdata/plex:/config
+      - ./apps/plex/config:/config
       - ${STORAGE_PATH}/shares:/data
     tmpfs:
       - /tmp
@@ -63,57 +75,91 @@ services:
       - LETSENCRYPT_HOST=${PLEX_VIRTUAL_HOST}
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
 
-  nextcloud-web:
-    image: nginx
-    container_name: nextcloud_webserver
-    links:
-      - nextcloud-app
-      - collabora
-    networks:
-      - proxy-tier
-    restart: unless-stopped
-    volumes_from:
-      - nextcloud-app
-    volumes:
-      - ./appdata/nextcloud/nginx.conf:/etc/nginx/nginx.conf:ro
-    environment:
-      - VIRTUAL_HOST=${NEXTCLOUD_VIRTUAL_HOST}
-      - VIRTUAL_PORT=80
-      - LETSENCRYPT_HOST=${NEXTCLOUD_VIRTUAL_HOST}
-      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
 
-  nextcloud-app:
-    image: nextcloud:fpm
-    container_name: nextcloud_fpm
-    links:
-      - nextcloud-db
-    networks:
-      - proxy-tier
-    restart: unless-stopped
-    volumes:
-      - ./appdata/nextcloud/apps:/var/www/html/apps
-      - ./appdata/nextcloud/config:/var/www/html/config
-      - ${STORAGE_PATH}/cloud:/var/www/html/data
-
+#-----------------------------------#
+# NEXTCLOUD                         #
+#-----------------------------------#
   nextcloud-db:
     image: mariadb
-    container_name: nextcloud_db
-    networks:
-      - proxy-tier
+    container_name: nextcloud-db
     restart: unless-stopped
     volumes:
-      - ./appdata/nextcloud/db:/var/lib/mysql
+      - nextcloud-db:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
       - MYSQL_PASSWORD=${NEXTCLOUD_MYSQL_PASSWORD}
 
-  redis:
-    image: redis
-    container_name: redis
+  nextcloud-app:
+    build: ./apps/nextcloud/app
+    container_name: nextcloud-app
+    restart: unless-stopped
+    volumes:
+      - nextcloud-core:/var/www/html
+      - ./apps/nextcloud/app/apps:/var/www/html/apps
+      - ./apps/nextcloud/app/config:/var/www/html/config
+      - ./apps/nextcloud/app/themes:/var/www/html/themes
+      - ${STORAGE_PATH}/cloud:/var/www/html/data
+    environment:
+      - MYSQL_HOST=nextcloud-db
+      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=${NEXTCLOUD_MYSQL_PASSWORD}
+    depends_on:
+      - nextcloud-db
+      - redis
+
+  nextcloud-web:
+    build: ./apps/nextcloud/web
+    container_name: nextcloud-web
+    restart: unless-stopped
+    volumes:
+      - nextcloud-core:/var/www/html:ro
+      - ./apps/nextcloud/app/apps:/var/www/html/apps:ro
+      - ./apps/nextcloud/app/config:/var/www/html/config:ro
+      - ./apps/nextcloud/app/themes:/var/www/html/themes:ro
+      - ${STORAGE_PATH}/cloud:/var/www/html/data:ro
+    environment:
+      - VIRTUAL_HOST=${NEXTCLOUD_VIRTUAL_HOST}
+      - VIRTUAL_PORT=80
+      - LETSENCRYPT_HOST=${NEXTCLOUD_VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+    depends_on:
+      - nextcloud-app
     networks:
       - proxy-tier
+      - default
+
+  nextcloud-cron:
+    build: ./apps/nextcloud/app
+    container_name: nextcloud-cron
+    restart: unless-stopped
+    volumes:
+      - nextcloud-core:/var/www/html
+      - ./apps/nextcloud/app/apps:/var/www/html/apps
+      - ./apps/nextcloud/app/config:/var/www/html/config
+      - ./apps/nextcloud/app/themes:/var/www/html/themes
+      - ${STORAGE_PATH}/cloud:/var/www/html/data
+    user: www-data
+    entrypoint: |
+      bash -c 'bash -s <<EOF
+        trap "break;exit" SIGHUP SIGINT SIGTERM
+        while [ ! -f /var/www/html/config/config.php ]; do
+          sleep 1
+        done
+        while true; do
+          php -f /var/www/html/cron.php
+          sleep 15m
+        done
+      EOF'
+    depends_on:
+      - nextcloud-db
+      - redis
+
+  redis:
+    image: redis
     restart: unless-stopped
 
   collabora:
@@ -127,14 +173,16 @@ services:
     environment:
       - domain=${NEXTCLOUD_VIRTUAL_HOST}
 
+
+#-----------------------------------#
+# HOME ASSISTANT                    #
+#-----------------------------------#
   home-assistant:
 # We build the image ourself and install dependencies necessary for tradfri until these issues are resolved:
 # - https://github.com/home-assistant/home-assistant/issues/10376
 # - https://github.com/home-assistant/home-assistant/issues/10048
 #    image: homeassistant/home-assistant
-    build:
-      context: .
-      dockerfile: Dockerfile.home-assistant
+    build: ./apps/home-assistant
     container_name: home-assistant
     links:
       - plex
@@ -142,9 +190,10 @@ services:
       - 8123:8123
     networks:
       - proxy-tier
+      - default
     restart: unless-stopped
     volumes:
-      - ./appdata/home-assistant:/config
+      - ./apps/home-assistant/config:/config
     environment:
       - TZ=${TIMEZONE}
       - VIRTUAL_HOST=${HOME_ASSISTANT_VIRTUAL_HOST}
@@ -152,6 +201,10 @@ services:
       - LETSENCRYPT_HOST=${HOME_ASSISTANT_VIRTUAL_HOST}
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
 
+
+#-----------------------------------#
+# DUPLICATI                         #
+#-----------------------------------#
   duplicati:
     image: linuxserver/duplicati
     container_name: duplicati
@@ -161,6 +214,14 @@ services:
     volumes:
       - ./:/source/opt
       - ${STORAGE_PATH}:/source/storage
+
+volumes:
+  nextcloud-db:
+  nextcloud-core:
+  proxy-certs:
+  proxy-conf:
+  proxy-vhost:
+  proxy-html:
 
 networks:
   proxy-tier:
