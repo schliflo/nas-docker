@@ -7,6 +7,8 @@ services:
   proxy:
     build: ./apps/proxy
     container_name: proxy
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     ports:
       - 80:80
       - 443:443
@@ -160,6 +162,7 @@ services:
 
   redis:
     image: redis
+    container_name: redis
     restart: unless-stopped
 
   collabora:
@@ -212,7 +215,10 @@ services:
       - 8200:8200
     restart: unless-stopped
     volumes:
-      - ./:/source/opt
+      - ./apps/duplicati/config:/config
+      - ./apps/duplicati/backup:/backup
+      - ./apps/duplicati/local:/source/local
+      - ./:/source/nas-docker
       - ${STORAGE_PATH}:/source/storage
 
 volumes:
