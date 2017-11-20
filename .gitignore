@@ -16,3 +16,5 @@ apps/duplicati/config/*
 !apps/duplicati/config/.gitkeep
 apps/duplicati/backup/*
 !apps/duplicati/backup/.gitkeep
+apps/duplicati/local/*
+!apps/duplicati/local/.gitkeep
