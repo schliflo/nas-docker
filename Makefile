@@ -1,3 +1,5 @@
+ARGS = $(filter-out $@,$(MAKECMDGOALS))
+
 #############################
 # ENVIRONMENT
 #############################
@@ -17,6 +19,9 @@ update:
 	docker-compose pull
 	docker-compose build --pull
 	make up
+
+logs:
+	docker-compose logs -f --tail=42 $(ARGS)
 
 #############################
 # BACKUP/RESTORE
