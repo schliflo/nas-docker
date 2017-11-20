@@ -1,0 +1,18 @@
+# HOME ASSISTANT
+apps/plex/config/*
+!apps/plex/config/.gitkeep
+# NEXTCLOUD
+apps/nextcloud/app/apps/*
+!apps/nextcloud/app/apps/.gitkeep
+apps/nextcloud/app/config/*
+!apps/nextcloud/app/config/.gitkeep
+apps/nextcloud/app/themes/*
+!apps/nextcloud/app/themes/.gitkeep
+# HOME ASSISTANT
+apps/home-assistant/config/*
+!apps/home-assistant/config/.gitkeep
+# DUPLICATI
+apps/duplicati/config/*
+!apps/duplicati/config/.gitkeep
+apps/duplicati/backup/*
+!apps/duplicati/backup/.gitkeep
