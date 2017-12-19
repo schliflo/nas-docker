@@ -181,11 +181,7 @@ services:
 # HOME ASSISTANT                    #
 #-----------------------------------#
   home-assistant:
-# We build the image ourself and install dependencies necessary for tradfri until these issues are resolved:
-# - https://github.com/home-assistant/home-assistant/issues/10376
-# - https://github.com/home-assistant/home-assistant/issues/10048
-#    image: homeassistant/home-assistant
-    build: ./apps/home-assistant
+    image: homeassistant/home-assistant
     container_name: home-assistant
     links:
       - plex
