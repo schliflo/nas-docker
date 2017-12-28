@@ -84,6 +84,8 @@ services:
   nextcloud-db:
     image: mariadb
     container_name: nextcloud-db
+    networks:
+      - proxy-tier
     restart: unless-stopped
     volumes:
       - nextcloud-db:/var/lib/mysql
@@ -96,6 +98,8 @@ services:
   nextcloud-app:
     build: ./apps/nextcloud/app
     container_name: nextcloud-app
+    networks:
+      - proxy-tier
     restart: unless-stopped
     volumes:
       - nextcloud-core:/var/www/html
@@ -112,10 +116,15 @@ services:
     depends_on:
       - nextcloud-db
       - redis
+    links:
+      - nextcloud-db
+      - redis
 
   nextcloud-web:
     build: ./apps/nextcloud/web
     container_name: nextcloud-web
+    networks:
+      - proxy-tier
     restart: unless-stopped
     volumes:
       - nextcloud-core:/var/www/html:ro
@@ -130,13 +139,14 @@ services:
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
     depends_on:
       - nextcloud-app
-    networks:
-      - proxy-tier
-      - default
+    links:
+      - nextcloud-app
 
   nextcloud-cron:
     build: ./apps/nextcloud/app
     container_name: nextcloud-cron
+    networks:
+      - proxy-tier
     restart: unless-stopped
     volumes:
       - nextcloud-core:/var/www/html
@@ -159,10 +169,15 @@ services:
     depends_on:
       - nextcloud-db
       - redis
+    links:
+      - nextcloud-db
+      - redis
 
   redis:
     image: redis
     container_name: redis
+    networks:
+      - proxy-tier
     restart: unless-stopped
 
   collabora:
