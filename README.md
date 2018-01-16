@@ -7,6 +7,7 @@ Repository containing the docker-compose setup for my NAS / homeserver
 - [Plex](https://www.plex.tv/) for movies and shows
 - [Duplicati](https://github.com/linuxserver/docker-duplicati) for backups
 - [Nginx Proxy](https://github.com/jwilder/nginx-proxy) with [Let's Encrypt](https://github.com/JrCs/docker-letsencrypt-nginx-proxy-companion) for secure external access
+- [HackMD](https://hackmd.io/) for easy note-taking via Markdown
 
 ## Environment
 You need to have the following environment variables setup or replaced in your `docker-compose.yml` and your storage mounted in `/mnt/storage/cloud` and `/mnt/storage/shares` for nextcloud and plex respectively.
@@ -31,6 +32,9 @@ NEXTCLOUD_MYSQL_ROOT_PASSWORD=yourRootPasswordHere
 NEXTCLOUD_MYSQL_PASSWORD=yourPasswordHere
 
 HOME_ASSISTANT_VIRTUAL_HOST=hass.example.com
+
+HACKMD_VIRTUAL_HOST=hackmd.example.com
+HACKMD_POSTGRES_PASSWORD=yourPasswordHere
 ```
 (you need to have correct DNS records set for the domains you want to use and probably setup port forwarding of ports 80 and 443 to your nas in order to get remote access and let's encrypt working)
 

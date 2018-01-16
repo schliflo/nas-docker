@@ -232,6 +232,44 @@ services:
       - ./:/source/nas-docker
       - ${STORAGE_PATH}:/source/storage
 
+
+#-----------------------------------#
+# HACKMD                            #
+#-----------------------------------#
+  hackmd-db:
+    image: postgres:alpine
+    container_name: hackmd-db
+    networks:
+      - proxy-tier
+    restart: unless-stopped
+    volumes:
+      - hackmd-db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=hackmd
+      - POSTGRES_PASSWORD=${HACKMD_POSTGRES_PASSWORD}
+      - POSTGRES_DB=hackmd
+
+  hackmd-app:
+    image: hackmdio/hackmd:latest-alpine
+    container_name: hackmd-app
+    networks:
+      - proxy-tier
+    restart: unless-stopped
+    environment:
+      - HMD_DB_URL=postgres://hackmd:${HACKMD_POSTGRES_PASSWORD}@hackmd-db:5432/hackmd
+      - HMD_USECDN=false
+      - HMD_ALLOW_EMAIL_REGISTER=false
+      - HMD_ALLOW_ANONYMOUS=false
+      - HMD_ALLOW_PDF_EXPORT=true
+      - VIRTUAL_HOST=${HACKMD_VIRTUAL_HOST}
+      - VIRTUAL_PORT=3000
+      - LETSENCRYPT_HOST=${HACKMD_VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+    depends_on:
+      - hackmd-db
+    links:
+      - hackmd-db
+
 volumes:
   nextcloud-db:
   nextcloud-core:
@@ -239,6 +277,7 @@ volumes:
   proxy-conf:
   proxy-vhost:
   proxy-html:
+  hackmd-db:
 
 networks:
   proxy-tier:
