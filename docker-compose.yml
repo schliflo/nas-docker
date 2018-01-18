@@ -116,9 +116,11 @@ services:
     depends_on:
       - nextcloud-db
       - redis
+      - elasticsearch
     links:
       - nextcloud-db
       - redis
+      - elasticsearch
 
   nextcloud-web:
     build: ./apps/nextcloud/web
@@ -171,9 +173,11 @@ services:
     depends_on:
       - nextcloud-db
       - redis
+      - elasticsearch
     links:
       - nextcloud-db
       - redis
+      - elasticsearch
 
   redis:
     image: redis
@@ -192,6 +196,17 @@ services:
     restart: unless-stopped
     environment:
       - domain=${NEXTCLOUD_VIRTUAL_HOST}
+
+  elasticsearch:
+    build: ./apps/nextcloud/elasticsearch
+    container_name: elasticsearch
+    networks:
+      - proxy-tier
+    restart: unless-stopped
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
 
 
 #-----------------------------------#
@@ -280,6 +295,7 @@ volumes:
   proxy-vhost:
   proxy-html:
   hackmd-db:
+  elasticsearch:
 
 networks:
   proxy-tier:
