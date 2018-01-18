@@ -139,8 +139,10 @@ services:
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
     depends_on:
       - nextcloud-app
+      - collabora
     links:
       - nextcloud-app
+      - collabora
 
   nextcloud-cron:
     build: ./apps/nextcloud/app
