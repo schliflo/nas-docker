@@ -287,6 +287,46 @@ services:
     links:
       - hackmd-db
 
+
+#-----------------------------------#
+# GITEA                             #
+#-----------------------------------#
+  gitea-app:
+    image: gitea/gitea
+    container_name: gitea-app
+    ports:
+      - 222:22
+    networks:
+      - proxy-tier
+      - default
+    restart: unless-stopped
+    volumes:
+      - ./apps/gitea/data:/data
+    environment:
+      - VIRTUAL_HOST=${GITEA_VIRTUAL_HOST}
+      - VIRTUAL_PORT=3000
+      - LETSENCRYPT_HOST=${GITEA_VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+    depends_on:
+      - gitea-db
+    links:
+      - gitea-db
+
+  gitea-db:
+    image: mariadb
+    container_name: gitea-db
+    networks:
+      - default
+    restart: unless-stopped
+    volumes:
+      - gitea-db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${GITEA_MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=gitea
+      - MYSQL_USER=gitea
+      - MYSQL_PASSWORD=${GITEA_MYSQL_PASSWORD}
+
+
 volumes:
   nextcloud-db:
   nextcloud-core:
@@ -296,6 +336,7 @@ volumes:
   proxy-html:
   hackmd-db:
   elasticsearch:
+  gitea-db:
 
 networks:
   proxy-tier:
