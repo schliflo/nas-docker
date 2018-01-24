@@ -234,23 +234,6 @@ services:
 
 
 #-----------------------------------#
-# DUPLICATI                         #
-#-----------------------------------#
-  duplicati:
-    image: linuxserver/duplicati
-    container_name: duplicati
-    ports:
-      - 8200:8200
-    restart: unless-stopped
-    volumes:
-      - ./apps/duplicati/config:/config
-      - ./apps/duplicati/backup:/backup
-      - ./apps/duplicati/local:/source/local
-      - ./:/source/nas-docker
-      - ${STORAGE_PATH}:/source/storage
-
-
-#-----------------------------------#
 # HACKMD                            #
 #-----------------------------------#
   hackmd-db:
