@@ -13,13 +13,6 @@
 # HOME ASSISTANT
 /apps/home-assistant/config/*
 !/apps/home-assistant/config/.gitkeep
-# DUPLICATI
-/apps/duplicati/config/*
-!/apps/duplicati/config/.gitkeep
-/apps/duplicati/backup/*
-!/apps/duplicati/backup/.gitkeep
-/apps/duplicati/local/*
-!/apps/duplicati/local/.gitkeep
 # GITEA
 /apps/gitea/data/*
 !/apps/gitea/data/.gitkeep
