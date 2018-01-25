@@ -5,7 +5,6 @@ Repository containing the docker-compose setup for my NAS / homeserver
 - [Nextcloud](https://nextcloud.com/) for convenient cloud storage
 - [Home Assistant](https://home-assistant.io/) for home automation and control
 - [Plex](https://www.plex.tv/) for movies and shows
-- [Duplicati](https://github.com/linuxserver/docker-duplicati) for backups
 - [Nginx Proxy](https://github.com/jwilder/nginx-proxy) with [Let's Encrypt](https://github.com/JrCs/docker-letsencrypt-nginx-proxy-companion) for secure external access
 - [HackMD](https://hackmd.io/) for easy note-taking via Markdown
 - [Gitea](https://gitea.io/) as GIT hosting / mirroring for some of my repositories
