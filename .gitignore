@@ -1,4 +1,4 @@
-/backup/
+/backup/*
 !/backup/.gitkeep
 # HOME ASSISTANT
 /apps/plex/config/*
