@@ -20,6 +20,13 @@ logs:
 	docker-compose logs -f --tail=42 $(ARGS)
 
 #############################
+# CONTAINER ACCESS
+#############################
+
+ssh:
+	docker exec -it $$(docker-compose ps -q $(ARGS)) sh
+
+#############################
 # UTILITIES
 #############################
 
