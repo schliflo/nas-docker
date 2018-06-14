@@ -310,6 +310,29 @@ services:
       - MYSQL_PASSWORD=${GITEA_MYSQL_PASSWORD}
 
 
+#-----------------------------------#
+# PYLOAD                            #
+#-----------------------------------#
+  pyload:
+    image: digrouz/docker-alp-pyload
+    container_name: pyload
+    networks:
+      - proxy-tier
+      - default
+    restart: unless-stopped
+    volumes:
+      - ${STORAGE_PATH}/downloads:/downloads
+      - ./apps/pyload/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - VIRTUAL_HOST=${PYLOAD_VIRTUAL_HOST}
+      - VIRTUAL_PORT=8000
+      - LETSENCRYPT_HOST=${PYLOAD_VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - DOCKUID=${DOCKER_USER_ID}
+      - DOCKGID=${DOCKER_USER_GROUP_ID}
+
+
 volumes:
   nextcloud-db:
   nextcloud-core:

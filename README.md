@@ -39,6 +39,8 @@ HACKMD_POSTGRES_PASSWORD=yourPasswordHere
 GITEA_VIRTUAL_HOST=git.example.com
 GITEA_MYSQL_ROOT_PASSWORD=yourRootPasswordHere
 GITEA_MYSQL_PASSWORD=yourPasswordHere
+
+PYLOAD_VIRTUAL_HOST=downloads.example.com
 ```
 (you need to have correct DNS records set for the domains you want to use and probably setup port forwarding of ports 80 and 443 to your nas in order to get remote access and let's encrypt working)
 
