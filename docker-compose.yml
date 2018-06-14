@@ -250,7 +250,7 @@ services:
       - POSTGRES_DB=hackmd
 
   hackmd-app:
-    image: hackmdio/hackmd:latest-alpine
+    image: hackmdio/hackmd:alpine
     container_name: hackmd-app
     networks:
       - proxy-tier
@@ -285,6 +285,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./apps/gitea/data:/data
+      - ./apps/gitea/repositories:/var/lib/gitea/repositories
+      - ./backup/gitea:/backup
     environment:
       - VIRTUAL_HOST=${GITEA_VIRTUAL_HOST}
       - VIRTUAL_PORT=3000
@@ -299,6 +301,7 @@ services:
     image: mariadb
     container_name: gitea-db
     networks:
+      - proxy-tier
       - default
     restart: unless-stopped
     volumes:

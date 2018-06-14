@@ -16,3 +16,8 @@
 # GITEA
 /apps/gitea/data/*
 !/apps/gitea/data/.gitkeep
+/apps/gitea/repositories/*
+!/apps/gitea/repositories/.gitkeep
+# PYLOAD
+/apps/pyload/config/*
+!/apps/pyload/config/.gitkeep

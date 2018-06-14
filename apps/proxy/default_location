@@ -1,0 +1,2 @@
+# do not block i-frames via X-Frame header
+proxy_hide_header X-Frame-Options;
