@@ -317,7 +317,7 @@ services:
 # PYLOAD                            #
 #-----------------------------------#
   pyload:
-    image: digrouz/docker-alp-pyload
+    image: rootlogin/pyload:latest-git
     container_name: pyload
     networks:
       - proxy-tier
@@ -326,14 +326,13 @@ services:
     volumes:
       - ${STORAGE_PATH}/downloads:/downloads
       - ./apps/pyload/config:/config
-      - /etc/localtime:/etc/localtime:ro
     environment:
       - VIRTUAL_HOST=${PYLOAD_VIRTUAL_HOST}
       - VIRTUAL_PORT=8000
       - LETSENCRYPT_HOST=${PYLOAD_VIRTUAL_HOST}
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
-      - DOCKUID=${DOCKER_USER_ID}
-      - DOCKGID=${DOCKER_USER_GROUP_ID}
+      - UID=${DOCKER_USER_ID}
+      - GID=${DOCKER_USER_GROUP_ID}
 
 
 volumes:
