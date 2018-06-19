@@ -40,16 +40,16 @@ update:
 	make nextcloud-maintenance-off
 
 nextcloud-occ:
-	docker exec -ti -u www-data nextcloud-app /var/www/html/occ $(ARGS)
+	docker exec -ti -u www-data nextcloud-app php -d memory_limit=4096M /var/www/html/occ $(ARGS)
 
 nextcloud-upgrade:
-	docker exec -u www-data nextcloud-app /var/www/html/occ upgrade
+	docker exec -u www-data nextcloud-app php -d memory_limit=4096M /var/www/html/occ upgrade
 
 nextcloud-maintenance-off:
-	docker exec -u www-data nextcloud-app /var/www/html/occ maintenance:mode --off
+	docker exec -u www-data nextcloud-app php -d memory_limit=4096M /var/www/html/occ maintenance:mode --off
 
 nextcloud-maintenance-on:
-	docker exec -u www-data nextcloud-app /var/www/html/occ maintenance:mode --on
+	docker exec -u www-data nextcloud-app php -d memory_limit=4096M /var/www/html/occ maintenance:mode --on
 
 #############################
 # BACKUP/RESTORE
