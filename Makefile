@@ -11,7 +11,7 @@ export BACKUP_DIR=backup
 # PROJECT STATES
 #############################
 up:
-	docker-compose up -d
+	docker-compose up -d --remove-orphans
 
 stop:
 	docker-compose stop
@@ -24,7 +24,7 @@ logs:
 #############################
 
 ssh:
-	docker exec -it $$(docker-compose ps -q $(ARGS)) sh
+	docker exec -it -u root $$(docker-compose ps -q $(ARGS)) sh
 
 #############################
 # UTILITIES
@@ -44,6 +44,7 @@ nextcloud-occ:
 
 nextcloud-upgrade:
 	docker exec -u www-data nextcloud-app php -d memory_limit=4096M /var/www/html/occ upgrade
+	docker exec -u www-data nextcloud-app php -d memory_limit=4096M /var/www/html/occ db:add-missing-indices
 
 nextcloud-maintenance-off:
 	docker exec -u www-data nextcloud-app php -d memory_limit=4096M /var/www/html/occ maintenance:mode --off
