@@ -210,30 +210,6 @@ services:
 
 
 #-----------------------------------#
-# HOME ASSISTANT                    #
-#-----------------------------------#
-  home-assistant:
-    image: homeassistant/home-assistant
-    container_name: home-assistant
-    links:
-      - plex
-    ports:
-      - 8123:8123
-    networks:
-      - proxy-tier
-      - default
-    restart: unless-stopped
-    volumes:
-      - ./apps/home-assistant/config:/config
-    environment:
-      - TZ=${TIMEZONE}
-      - VIRTUAL_HOST=${HOME_ASSISTANT_VIRTUAL_HOST}
-      - VIRTUAL_PORT=8123
-      - LETSENCRYPT_HOST=${HOME_ASSISTANT_VIRTUAL_HOST}
-      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
-
-
-#-----------------------------------#
 # HACKMD                            #
 #-----------------------------------#
   hackmd-db:
