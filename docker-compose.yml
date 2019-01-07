@@ -299,6 +299,7 @@ services:
       - proxy-tier
     restart: unless-stopped
     volumes:
+      - invoiceninja-core:/var/www/app:rw
       - ./apps/invoiceninja/app/storage:/var/www/app/storage:rw
       - ./apps/invoiceninja/app/logo:/var/www/app/public/logo:rw
     environment:
@@ -328,6 +329,7 @@ services:
       - proxy-tier
     restart: unless-stopped
     volumes:
+      - invoiceninja-core:/var/www/app:rw
       - ./apps/invoiceninja/app/storage:/var/www/app/storage:rw
       - ./apps/invoiceninja/app/logo:/var/www/app/public/logo:rw
     environment:
@@ -367,6 +369,7 @@ services:
       - proxy-tier
     restart: unless-stopped
     volumes:
+      - invoiceninja-core:/var/www/app:ro
       - ./apps/invoiceninja/web/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./apps/invoiceninja/app/storage:/var/www/app/storage:rw
       - ./apps/invoiceninja/app/logo:/var/www/app/public/logo:rw
@@ -427,6 +430,7 @@ volumes:
   hackmd-db:
   elasticsearch:
   gitea-db:
+  invoiceninja-core:
   invoiceninja-db:
 
 networks:
