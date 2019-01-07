@@ -295,6 +295,8 @@ services:
   invoiceninja-app:
     image: invoiceninja/invoiceninja
     container_name: invoiceninja-app
+    networks:
+      - proxy-tier
     restart: unless-stopped
     volumes:
       - ./apps/invoiceninja/app/storage:/var/www/app/storage:rw
@@ -322,6 +324,9 @@ services:
   invoiceninja-cron:
     image: invoiceninja/invoiceninja
     container_name: invoiceninja-cron
+    networks:
+      - proxy-tier
+    restart: unless-stopped
     volumes:
       - ./apps/invoiceninja/app/storage:/var/www/app/storage:rw
       - ./apps/invoiceninja/app/logo:/var/www/app/public/logo:rw
@@ -358,6 +363,9 @@ services:
   invoiceninja-web:
     image: nginx:1
     container_name: invoiceninja-web
+    networks:
+      - proxy-tier
+    restart: unless-stopped
     volumes:
       - ./apps/invoiceninja/web/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./apps/invoiceninja/app/storage:/var/www/app/storage:rw
@@ -373,6 +381,8 @@ services:
   invoiceninja-db:
     image: mariadb
     container_name: invoiceninja-db
+    networks:
+      - proxy-tier
     restart: unless-stopped
     volumes:
       - invoiceninja-db:/var/lib/mysql
