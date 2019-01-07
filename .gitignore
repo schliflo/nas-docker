@@ -18,6 +18,11 @@
 !/apps/gitea/data/.gitkeep
 /apps/gitea/repositories/*
 !/apps/gitea/repositories/.gitkeep
+# INVOICENINJA
+/apps/invoiceninja/app/logo/*
+!/apps/invoiceninja/app/logo/.gitkeep
+/apps/invoiceninja/app/storage/*
+!/apps/invoiceninja/app/storage/.gitkeep
 # PYLOAD
 /apps/pyload/config/*
 !/apps/pyload/config/.gitkeep
