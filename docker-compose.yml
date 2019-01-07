@@ -1,9 +1,9 @@
 version: '3'
 
 services:
-#-----------------------------------#
-# PROXY                             #
-#-----------------------------------#
+  #-----------------------------------#
+  # PROXY                             #
+  #-----------------------------------#
   proxy:
     build: ./apps/proxy
     container_name: proxy
@@ -23,9 +23,9 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
 
-#-----------------------------------#
-# LETSENCRYPT                       #
-#-----------------------------------#
+  #-----------------------------------#
+  # LETSENCRYPT                       #
+  #-----------------------------------#
   letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
     container_name: letsencrypt
@@ -40,9 +40,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
 
-#-----------------------------------#
-# PLEX                              #
-#-----------------------------------#
+  #-----------------------------------#
+  # PLEX                              #
+  #-----------------------------------#
   plex:
     image: plexinc/pms-docker
     container_name: plex
@@ -78,9 +78,9 @@ services:
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
 
 
-#-----------------------------------#
-# NEXTCLOUD                         #
-#-----------------------------------#
+  #-----------------------------------#
+  # NEXTCLOUD                         #
+  #-----------------------------------#
   nextcloud-db:
     image: mariadb
     container_name: nextcloud-db
@@ -209,9 +209,9 @@ services:
       - discovery.type=single-node
 
 
-#-----------------------------------#
-# HACKMD                            #
-#-----------------------------------#
+  #-----------------------------------#
+  # HACKMD                            #
+  #-----------------------------------#
   hackmd-db:
     image: postgres:alpine
     container_name: hackmd-db
@@ -247,9 +247,9 @@ services:
       - hackmd-db
 
 
-#-----------------------------------#
-# GITEA                             #
-#-----------------------------------#
+  #-----------------------------------#
+  # GITEA                             #
+  #-----------------------------------#
   gitea-app:
     image: gitea/gitea
     container_name: gitea-app
@@ -289,9 +289,9 @@ services:
       - MYSQL_PASSWORD=${GITEA_MYSQL_PASSWORD}
 
 
-#-----------------------------------#
-# INVOICENINJA                      #
-#-----------------------------------#
+  #-----------------------------------#
+  # INVOICENINJA                      #
+  #-----------------------------------#
   invoiceninja-app:
     image: invoiceninja/invoiceninja
     container_name: invoiceninja-app
@@ -299,10 +299,12 @@ services:
       - proxy-tier
     restart: unless-stopped
     volumes:
-      - invoiceninja-core:/var/www/app:rw
+      - invoiceninja-public:/var/www/app/public:rw
       - ./apps/invoiceninja/app/storage:/var/www/app/storage:rw
       - ./apps/invoiceninja/app/logo:/var/www/app/public/logo:rw
     environment:
+      - TRUSTED_PROXIES='10.0.0.0/8,172.16.0.0/12,192.168.0.0/16'
+      - REQUIRE_HTTPS=true"
       - APP_DEBUG=0
       - APP_URL=https://${INVOICENINJA_VIRTUAL_HOST}
       - APP_KEY=${INVOICENINJA_APP_KEY}
@@ -329,10 +331,12 @@ services:
       - proxy-tier
     restart: unless-stopped
     volumes:
-      - invoiceninja-core:/var/www/app:rw
+      - invoiceninja-public:/var/www/app/public:rw
       - ./apps/invoiceninja/app/storage:/var/www/app/storage:rw
       - ./apps/invoiceninja/app/logo:/var/www/app/public/logo:rw
     environment:
+      - TRUSTED_PROXIES='10.0.0.0/8,172.16.0.0/12,192.168.0.0/16'
+      - REQUIRE_HTTPS=true
       - APP_DEBUG=0
       - APP_URL=https://${INVOICENINJA_VIRTUAL_HOST}
       - APP_KEY=${INVOICENINJA_APP_KEY}
@@ -369,11 +373,12 @@ services:
       - proxy-tier
     restart: unless-stopped
     volumes:
-      - invoiceninja-core:/var/www/app:ro
+      - invoiceninja-public:/var/www/app/public:ro
       - ./apps/invoiceninja/web/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./apps/invoiceninja/app/storage:/var/www/app/storage:rw
       - ./apps/invoiceninja/app/logo:/var/www/app/public/logo:rw
     environment:
+      - TRUSTED_PROXIES='10.0.0.0/8,172.16.0.0/12,192.168.0.0/16'
       - VIRTUAL_HOST=${INVOICENINJA_VIRTUAL_HOST}
       - VIRTUAL_PORT=80
       - LETSENCRYPT_HOST=${INVOICENINJA_VIRTUAL_HOST}
@@ -398,9 +403,9 @@ services:
       - MYSQL_PASSWORD=${INVOICENINJA_MYSQL_PASSWORD}
 
 
-#-----------------------------------#
-# PYLOAD                            #
-#-----------------------------------#
+  #-----------------------------------#
+  # PYLOAD                            #
+  #-----------------------------------#
   pyload:
     image: rootlogin/pyload:latest-git
     container_name: pyload
@@ -430,7 +435,7 @@ volumes:
   hackmd-db:
   elasticsearch:
   gitea-db:
-  invoiceninja-core:
+  invoiceninja-public:
   invoiceninja-db:
 
 networks:
