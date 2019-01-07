@@ -373,6 +373,8 @@ services:
     environment:
       - VIRTUAL_HOST=${INVOICENINJA_VIRTUAL_HOST}
       - VIRTUAL_PORT=80
+      - LETSENCRYPT_HOST=${INVOICENINJA_VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
     depends_on:
       - invoiceninja-app
     links:
