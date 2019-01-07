@@ -40,6 +40,15 @@ GITEA_VIRTUAL_HOST=git.example.com
 GITEA_MYSQL_ROOT_PASSWORD=yourRootPasswordHere
 GITEA_MYSQL_PASSWORD=yourPasswordHere
 
+INVOICENINJA_VIRTUAL_HOST=invoice.example.com
+INVOICENINJA_MYSQL_ROOT_PASSWORD=yourRootPasswordHere
+INVOICENINJA_MYSQL_PASSWORD=yourPasswordHere
+INVOICENINJA_MAIL_HOST=smtp.example.com
+INVOICENINJA_MAIL_USER=invoice@example.com
+INVOICENINJA_MAIL_PASSWORD=yourPasswordHere
+INVOICENINJA_MAIL_FROM_NAME=Your Name
+INVOICENINJA_MAIL_FROM_ADDRESS=invoice@example.com
+
 PYLOAD_VIRTUAL_HOST=downloads.example.com
 ```
 (you need to have correct DNS records set for the domains you want to use and probably setup port forwarding of ports 80 and 443 to your nas in order to get remote access and let's encrypt working)
