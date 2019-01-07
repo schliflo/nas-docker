@@ -370,17 +370,17 @@ services:
     links:
       - invoiceninja-app
 
-    invoiceninja-db:
-      image: mariadb
-      container_name: invoiceninja-db
-      restart: unless-stopped
-      volumes:
-        - invoiceninja-db:/var/lib/mysql
-      environment:
-        - MYSQL_ROOT_PASSWORD=${INVOICENINJA_MYSQL_ROOT_PASSWORD}
-        - MYSQL_DATABASE=ninja
-        - MYSQL_USER=ninja
-        - MYSQL_PASSWORD=${INVOICENINJA_MYSQL_PASSWORD}
+  invoiceninja-db:
+    image: mariadb
+    container_name: invoiceninja-db
+    restart: unless-stopped
+    volumes:
+      - invoiceninja-db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${INVOICENINJA_MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=ninja
+      - MYSQL_USER=ninja
+      - MYSQL_PASSWORD=${INVOICENINJA_MYSQL_PASSWORD}
 
 
 #-----------------------------------#
