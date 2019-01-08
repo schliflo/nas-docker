@@ -213,7 +213,7 @@ services:
   # HACKMD                            #
   #-----------------------------------#
   hackmd-db:
-    image: postgres:alpine
+    image: postgres:10-alpine
     container_name: hackmd-db
     networks:
       - proxy-tier
