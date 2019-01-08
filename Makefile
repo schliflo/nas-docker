@@ -55,7 +55,11 @@ nextcloud-maintenance-on:
 #############################
 # BACKUP/RESTORE
 #############################
-backup-dbs: nextcloud-db-backup gitea-db-backup hackmd-db-backup
+backup-dbs:
+	make nextcloud-db-backup
+	make gitea-db-backup
+	make hackmd-db-backup
+	make invoiceninja-db-backup
 
 nextcloud-db-backup:
 	docker exec $$(docker-compose ps -q nextcloud-db) mysqldump -uroot -p${NEXTCLOUD_MYSQL_ROOT_PASSWORD} --opt --single-transaction --events --all-databases --routines --comments | bzip2 > "${BACKUP_DIR}/nextcloud-db.sql.bz2"
@@ -80,3 +84,10 @@ hackmd-db-backup:
 
 hackmd-db-restore:
 	bzcat "${BACKUP_DIR}/hackmd-db.sql.bz2" | docker exec -i $$(docker-compose ps -q hackmd-db) psql -U hackmd
+
+invoiceninja-db-backup:
+	docker exec $$(docker-compose ps -q invoiceninja-db) mysqldump -uroot -p${INVOICENINJA_MYSQL_ROOT_PASSWORD} --opt --single-transaction --events --all-databases --routines --comments | bzip2 > "${BACKUP_DIR}/invoiceninja-db.sql.bz2"
+
+invoiceninja-db-restore:
+	bzcat "${BACKUP_DIR}/invoiceninja-db.sql.bz2" | docker exec -i $$(docker-compose ps -q invoiceninja-db) mysql -u root -p${INVOICENINJA_MYSQL_ROOT_PASSWORD}
+	echo "FLUSH PRIVILEGES;" | docker exec -i $$(docker-compose ps -q invoiceninja-db) mysql -u root -p${INVOICENINJA_MYSQL_ROOT_PASSWORD}
