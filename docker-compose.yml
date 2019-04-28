@@ -84,8 +84,6 @@ services:
   nextcloud-db:
     image: mariadb
     container_name: nextcloud-db
-    networks:
-      - proxy-tier
     restart: unless-stopped
     volumes:
       - nextcloud-db:/var/lib/mysql
@@ -94,6 +92,7 @@ services:
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
       - MYSQL_PASSWORD=${NEXTCLOUD_MYSQL_PASSWORD}
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
 
   nextcloud-app:
     build: ./apps/nextcloud/app
@@ -113,11 +112,8 @@ services:
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
       - MYSQL_PASSWORD=${NEXTCLOUD_MYSQL_PASSWORD}
+      - REDIS_HOST=redis
     depends_on:
-      - nextcloud-db
-      - redis
-      - elasticsearch
-    links:
       - nextcloud-db
       - redis
       - elasticsearch
@@ -127,6 +123,7 @@ services:
     container_name: nextcloud-web
     networks:
       - proxy-tier
+      - default
     restart: unless-stopped
     volumes:
       - nextcloud-core:/var/www/html:ro
@@ -149,8 +146,6 @@ services:
   nextcloud-cron:
     build: ./apps/nextcloud/app
     container_name: nextcloud-cron
-    networks:
-      - proxy-tier
     restart: unless-stopped
     volumes:
       - nextcloud-core:/var/www/html
@@ -159,17 +154,7 @@ services:
       - ./apps/nextcloud/app/themes:/var/www/html/themes
       - ${STORAGE_PATH}/cloud:/var/www/html/data
     user: www-data
-    entrypoint: |
-      bash -c 'bash -s <<EOF
-        trap "break;exit" SIGHUP SIGINT SIGTERM
-        while [ ! -f /var/www/html/config/config.php ]; do
-          sleep 1
-        done
-        while true; do
-          php -f /var/www/html/cron.php
-          sleep 15m
-        done
-      EOF'
+    entrypoint: /cron.sh
     depends_on:
       - nextcloud-db
       - redis
@@ -182,8 +167,6 @@ services:
   redis:
     image: redis
     container_name: redis
-    networks:
-      - proxy-tier
     restart: unless-stopped
 
   collabora:
@@ -268,6 +251,11 @@ services:
       - VIRTUAL_PORT=3000
       - LETSENCRYPT_HOST=${GITEA_VIRTUAL_HOST}
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - DB_TYPE=mysql
+      - DB_HOST=gitea-db:3306
+      - DB_NAME=gitea
+      - DB_USER=gitea
+      - DB_PASSWD=${GITEA_MYSQL_PASSWORD}
     depends_on:
       - gitea-db
     links:
@@ -303,7 +291,7 @@ services:
       - ./apps/invoiceninja/app/storage:/var/www/app/storage:rw
       - ./apps/invoiceninja/app/logo:/var/www/app/public/logo:rw
     environment:
-      - TRUSTED_PROXIES='10.0.0.0/8,172.16.0.0/12,192.168.0.0/16'
+      - TRUSTED_PROXIES="10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
       - REQUIRE_HTTPS=true"
       - APP_DEBUG=0
       - APP_URL=https://${INVOICENINJA_VIRTUAL_HOST}
@@ -335,7 +323,7 @@ services:
       - ./apps/invoiceninja/app/storage:/var/www/app/storage:rw
       - ./apps/invoiceninja/app/logo:/var/www/app/public/logo:rw
     environment:
-      - TRUSTED_PROXIES='10.0.0.0/8,172.16.0.0/12,192.168.0.0/16'
+      - TRUSTED_PROXIES="10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
       - REQUIRE_HTTPS=true
       - APP_DEBUG=0
       - APP_URL=https://${INVOICENINJA_VIRTUAL_HOST}
@@ -378,7 +366,6 @@ services:
       - ./apps/invoiceninja/app/storage:/var/www/app/storage:rw
       - ./apps/invoiceninja/app/logo:/var/www/app/public/logo:rw
     environment:
-      - TRUSTED_PROXIES='10.0.0.0/8,172.16.0.0/12,192.168.0.0/16'
       - VIRTUAL_HOST=${INVOICENINJA_VIRTUAL_HOST}
       - VIRTUAL_PORT=80
       - LETSENCRYPT_HOST=${INVOICENINJA_VIRTUAL_HOST}

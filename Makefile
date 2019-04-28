@@ -33,11 +33,7 @@ ssh:
 update:
 	docker-compose pull
 	docker-compose build --pull
-	make nextcloud-maintenance-on
 	make up
-	make nextcloud-maintenance-off
-	make nextcloud-upgrade
-	make nextcloud-maintenance-off
 
 nextcloud-occ:
 	docker exec -ti -u www-data nextcloud-app php -d memory_limit=4096M /var/www/html/occ $(ARGS)

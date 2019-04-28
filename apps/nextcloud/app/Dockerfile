@@ -12,6 +12,3 @@ RUN set -ex; \
     \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     rm -rf /var/lib/apt/lists/*;
-
-# configure redis
-COPY redis.config.php /usr/src/nextcloud/config/redis.config.php
