@@ -173,6 +173,9 @@ services:
   redis:
     image: redis
     container_name: redis
+    networks:
+      - proxy-tier
+      - default
     restart: unless-stopped
 
   collabora:
