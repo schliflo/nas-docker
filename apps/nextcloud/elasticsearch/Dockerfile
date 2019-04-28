@@ -1,3 +1,3 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:6.7.1
+FROM elasticsearch:6.6.2
 
-RUN bin/elasticsearch-plugin install ingest-attachment
+RUN bin/elasticsearch-plugin install --batch ingest-attachment
