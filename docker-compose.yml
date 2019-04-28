@@ -84,6 +84,8 @@ services:
   nextcloud-db:
     image: mariadb
     container_name: nextcloud-db
+    networks:
+      - proxy-tier
     restart: unless-stopped
     volumes:
       - nextcloud-db:/var/lib/mysql
