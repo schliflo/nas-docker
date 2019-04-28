@@ -201,7 +201,7 @@ services:
       - discovery.type=single-node
 
   kibana:
-    image: docker.elastic.co/kibana/kibana
+    image: docker.elastic.co/kibana/kibana:6.6.2
     container_name: kibana
     networks:
       - proxy-tier
