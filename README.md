@@ -8,6 +8,7 @@ Repository containing the docker-compose setup for my NAS / homeserver
 - [Nginx Proxy](https://github.com/jwilder/nginx-proxy) with [Let's Encrypt](https://github.com/JrCs/docker-letsencrypt-nginx-proxy-companion) for secure external access
 - [HackMD](https://hackmd.io/) for easy note-taking via Markdown
 - [Gitea](https://gitea.io/) as GIT hosting / mirroring for some of my repositories
+- [InvoiceNinja](https://www.invoiceninja.com/) for custom invoicing
 
 ## Environment
 You need to have the following environment variables setup or replaced in your `docker-compose.yml` and your storage mounted in `/mnt/storage/cloud` and `/mnt/storage/shares` for nextcloud and plex respectively.
@@ -30,6 +31,8 @@ PLEX_VIRTUAL_HOST=plex.example.com
 NEXTCLOUD_VIRTUAL_HOST=cloud.example.com
 NEXTCLOUD_MYSQL_ROOT_PASSWORD=yourRootPasswordHere
 NEXTCLOUD_MYSQL_PASSWORD=yourPasswordHere
+
+KIBANA_VIRTUAL_HOST=kibana.example.com
 
 HOME_ASSISTANT_VIRTUAL_HOST=hass.example.com
 

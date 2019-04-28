@@ -200,6 +200,23 @@ services:
     environment:
       - discovery.type=single-node
 
+  kibana:
+    image: docker.elastic.co/kibana/kibana
+    container_name: kibana
+    networks:
+      - proxy-tier
+    restart: unless-stopped
+    environment:
+      - "ELASTICSEARCH_URL=http://elasticsearch:9200"
+      - VIRTUAL_HOST=${KIBANA_VIRTUAL_HOST}
+      - VIRTUAL_PORT=80
+      - LETSENCRYPT_HOST=${KIBANA_VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+
 
   #-----------------------------------#
   # HACKMD                            #
