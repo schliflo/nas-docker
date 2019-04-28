@@ -119,6 +119,10 @@ services:
       - nextcloud-db
       - redis
       - elasticsearch
+    links:
+      - nextcloud-db
+      - redis
+      - elasticsearch
 
   nextcloud-web:
     build: ./apps/nextcloud/web
